@@ -1,15 +1,20 @@
 from os.path import join, dirname, abspath
 
-from qtpy.QtCore import Qt, QMetaObject, Signal, Slot, QEvent
+from qtpy.QtCore import Qt, QMetaObject, Signal, Slot
 from qtpy.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QToolButton,
-                            QLabel, QSizePolicy)
+                            QLabel, QSizePolicy, QSpacerItem, QDesktopWidget, QMessageBox,
+                            QFrame)
+from PyQt5 import QtGui, QtCore
 
 from ._utils import QT_VERSION
 
-
-_FL_STYLESHEET = join(dirname(abspath(__file__)), 'resources/frameless.qss')
+_FL_STYLESHEET = ':/resources/frameless.qss'
 """ str: Frameless window stylesheet. """
 
+
+def print_args(*args):
+    for a in args:
+        print(a)
 
 class WindowDragger(QWidget):
     """ Window dragger.
@@ -52,11 +57,12 @@ class ModernWindow(QWidget):
             parent (QWidget, optional): Parent widget.
     """
 
-    def __init__(self, w, parent=None):
+    def __init__(self, w, parent=None, logo=None, resize=True, osx_buttons=False):
         QWidget.__init__(self, parent)
+        self.resizable = resize
 
-        self._w = w
-        self.setupUi()
+        self.setupUi(logo, osx_buttons)
+        self.setupEvents(w)
 
         contentLayout = QHBoxLayout()
         contentLayout.setContentsMargins(0, 0, 0, 0)
@@ -67,9 +73,16 @@ class ModernWindow(QWidget):
         self.setWindowTitle(w.windowTitle())
         self.setGeometry(w.geometry())
 
-        self.installEventFilter(self)
+        if not resize:
+            self.setFixedSize(self.size())
 
-    def setupUi(self):
+        # Center
+        qr = self.frameGeometry()
+        cp = QDesktopWidget().availableGeometry().center()
+        qr.moveCenter(cp)
+        self.move(qr.topLeft())
+
+    def setupUi(self, logo, osx_buttons):
         # create title bar, content
         self.vboxWindow = QVBoxLayout(self)
         self.vboxWindow.setContentsMargins(0, 0, 0, 0)
@@ -78,6 +91,7 @@ class ModernWindow(QWidget):
         self.windowFrame.setObjectName('windowFrame')
 
         self.vboxFrame = QVBoxLayout(self.windowFrame)
+        # self.vboxFrame.setContentsMargins(10, 10, 10, 0)
         self.vboxFrame.setContentsMargins(0, 0, 0, 0)
 
         self.titleBar = WindowDragger(self, self.windowFrame)
@@ -89,10 +103,23 @@ class ModernWindow(QWidget):
         self.hboxTitle.setContentsMargins(0, 0, 0, 0)
         self.hboxTitle.setSpacing(0)
 
+        if logo is not None:
+            self.logoLbl = QLabel()
+            pixmap = QtGui.QPixmap(logo)
+            self.logoLbl.setScaledContents(True)
+            self.logoLbl.setPixmap(pixmap)
+            self.logoLbl.setMaximumSize(QtCore.QSize(40, 40))
+            self.logoLbl.setContentsMargins(10, 10, 0, 0)
+            self.hboxTitle.addWidget(self.logoLbl)
+
         self.lblTitle = QLabel('Title')
         self.lblTitle.setObjectName('lblTitle')
+        self.lblTitle.setStyleSheet('QLabel { color: #bbb; }')
+        self.lblTitle.setContentsMargins(10, 0, 0, 0)
         self.lblTitle.setAlignment(Qt.AlignCenter)
         self.hboxTitle.addWidget(self.lblTitle)
+
+        self.hboxTitle.addItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
 
         spButtons = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
 
@@ -100,22 +127,27 @@ class ModernWindow(QWidget):
         self.btnMinimize.setObjectName('btnMinimize')
         self.btnMinimize.setSizePolicy(spButtons)
         self.hboxTitle.addWidget(self.btnMinimize)
+        self.hboxTitle.setAlignment(self.btnMinimize, Qt.AlignTop)
 
-        self.btnRestore = QToolButton(self.titleBar)
-        self.btnRestore.setObjectName('btnRestore')
-        self.btnRestore.setSizePolicy(spButtons)
-        self.btnRestore.setVisible(False)
-        self.hboxTitle.addWidget(self.btnRestore)
+        if self.resizable:
+            self.btnRestore = QToolButton(self.titleBar)
+            self.btnRestore.setObjectName('btnRestore')
+            self.btnRestore.setSizePolicy(spButtons)
+            self.btnRestore.setVisible(False)
+            self.hboxTitle.addWidget(self.btnRestore)
+            self.hboxTitle.setAlignment(self.btnRestore, Qt.AlignTop)
 
-        self.btnMaximize = QToolButton(self.titleBar)
-        self.btnMaximize.setObjectName('btnMaximize')
-        self.btnMaximize.setSizePolicy(spButtons)
-        self.hboxTitle.addWidget(self.btnMaximize)
+            self.btnMaximize = QToolButton(self.titleBar)
+            self.btnMaximize.setObjectName('btnMaximize')
+            self.btnMaximize.setSizePolicy(spButtons)
+            self.hboxTitle.addWidget(self.btnMaximize)
+            self.hboxTitle.setAlignment(self.btnMaximize, Qt.AlignTop)
 
         self.btnClose = QToolButton(self.titleBar)
         self.btnClose.setObjectName('btnClose')
         self.btnClose.setSizePolicy(spButtons)
         self.hboxTitle.addWidget(self.btnClose)
+        self.hboxTitle.setAlignment(self.btnClose, Qt.AlignTop)
 
         self.vboxFrame.addWidget(self.titleBar)
 
@@ -132,17 +164,28 @@ class ModernWindow(QWidget):
             self.setAttribute(Qt.WA_TranslucentBackground)
 
         # set stylesheet
-        with open(_FL_STYLESHEET) as stylesheet:
-            self.setStyleSheet(stylesheet.read())
+        # with open(_FL_STYLESHEET) as stylesheet:
+        #     self.setStyleSheet(stylesheet.read())
+        stream = QtCore.QFile(_FL_STYLESHEET)
+        stream.open(QtCore.QIODevice.ReadOnly)
+        _FL_TITLEBAR_BUTTONS = ':/resources/windows_titlebar.qss'
+        if osx_buttons:
+            _FL_TITLEBAR_BUTTONS = ':/resources/osx_titlebar.qss'
+        stream2 = QtCore.QFile(_FL_TITLEBAR_BUTTONS)
+        stream2.open(QtCore.QIODevice.ReadOnly)
+
+        bytestream = QtCore.QTextStream(stream).readAll()
+        print(bytestream)
+        bytestream += QtCore.QTextStream(stream2).readAll()
+
+        self.setStyleSheet(bytestream)
 
         # automatically connect slots
         QMetaObject.connectSlotsByName(self)
 
-    def eventFilter(self, source, event):
-        if event.type() == QEvent.Close:
-            return self._w.close()
-
-        return QWidget.eventFilter(self, source, event)
+    def setupEvents(self, w):
+        w.close = self.close
+        self.closeEvent = w.closeEvent
 
     def setWindowTitle(self, title):
         """ Set window title.
@@ -156,6 +199,7 @@ class ModernWindow(QWidget):
     @Slot()
     def on_btnMinimize_clicked(self):
         self.setWindowState(Qt.WindowMinimized)
+        print('Minimized clicked')
 
     @Slot()
     def on_btnRestore_clicked(self):
@@ -163,13 +207,16 @@ class ModernWindow(QWidget):
         self.btnMaximize.setVisible(True)
 
         self.setWindowState(Qt.WindowNoState)
+        print('Restore clicked')
 
     @Slot()
     def on_btnMaximize_clicked(self):
         self.btnRestore.setVisible(True)
         self.btnMaximize.setVisible(False)
 
-        self.setWindowState(Qt.WindowMaximized)
+        # self.setWindowState(Qt.WindowMaximized)
+        self.showMaximized()
+        print('Maximized clicked')
 
     @Slot()
     def on_btnClose_clicked(self):

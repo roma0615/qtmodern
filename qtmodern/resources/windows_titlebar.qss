@@ -1,0 +1,52 @@
+
+#btnClose, #btnRestore, #btnMaximize, #btnMinimize {
+  background-color:none;
+  border:none;
+  width:16px;
+  height:16px;
+  padding:4px;
+}
+
+#btnRestore {
+  /* background-color: hsv(123, 204, 198); */
+  image: url(:/resources/icon_window_restore.png);
+}
+#btnRestore::hover {
+  background-color: palette(alternate-base);
+}
+#btnRestore::pressed {
+  background-color: palette(highlight);
+}
+
+#btnMaximize {
+  /* background-color: hsv(123, 204, 198); */
+  image: url(:/resources/icon_window_maximize.png);
+}
+#btnMaximize::hover {
+  background-color: palette(alternate-base);
+}
+#btnMaximize::pressed {
+  background-color: palette(highlight);
+}
+
+#btnMinimize {
+  /* background-color: hsv(38, 218, 253); */
+  image: url(:/resources/icon_window_minimize.png);
+}
+#btnMinimize::hover {
+  background-color: palette(alternate-base);
+}
+#btnMinimize::pressed {
+  background-color: palette(highlight);
+}
+
+#btnClose {
+  /* background-color: hsv(0, 182, 252); */
+  image: url(:/resources/icon_window_close.png);
+}
+#btnClose::hover {
+  background-color: palette(alternate-base);
+}
+#btnClose::pressed {
+  background-color: palette(highlight);
+}

@@ -91,7 +91,6 @@ class ModernWindow(QWidget):
         self.windowFrame.setObjectName('windowFrame')
 
         self.vboxFrame = QVBoxLayout(self.windowFrame)
-        # self.vboxFrame.setContentsMargins(10, 10, 10, 0)
         self.vboxFrame.setContentsMargins(0, 0, 0, 0)
 
         self.titleBar = WindowDragger(self, self.windowFrame)
@@ -109,45 +108,37 @@ class ModernWindow(QWidget):
             self.logoLbl.setScaledContents(True)
             self.logoLbl.setPixmap(pixmap)
             self.logoLbl.setMaximumSize(QtCore.QSize(40, 40))
-            self.logoLbl.setContentsMargins(10, 10, 0, 0)
-            self.hboxTitle.addWidget(self.logoLbl)
+            if osx_buttons:
+                self.logoLbl.setContentsMargins(0, 10, 10, 0)
+            else:
+                self.logoLbl.setContentsMargins(10, 10, 0, 0)
 
         self.lblTitle = QLabel('Title')
         self.lblTitle.setObjectName('lblTitle')
         self.lblTitle.setStyleSheet('QLabel { color: #bbb; }')
         self.lblTitle.setContentsMargins(10, 0, 0, 0)
         self.lblTitle.setAlignment(Qt.AlignCenter)
-        self.hboxTitle.addWidget(self.lblTitle)
 
-        self.hboxTitle.addItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
 
         spButtons = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
 
         self.btnMinimize = QToolButton(self.titleBar)
         self.btnMinimize.setObjectName('btnMinimize')
         self.btnMinimize.setSizePolicy(spButtons)
-        self.hboxTitle.addWidget(self.btnMinimize)
-        self.hboxTitle.setAlignment(self.btnMinimize, Qt.AlignTop)
 
         if self.resizable:
             self.btnRestore = QToolButton(self.titleBar)
             self.btnRestore.setObjectName('btnRestore')
             self.btnRestore.setSizePolicy(spButtons)
             self.btnRestore.setVisible(False)
-            self.hboxTitle.addWidget(self.btnRestore)
-            self.hboxTitle.setAlignment(self.btnRestore, Qt.AlignTop)
 
             self.btnMaximize = QToolButton(self.titleBar)
             self.btnMaximize.setObjectName('btnMaximize')
             self.btnMaximize.setSizePolicy(spButtons)
-            self.hboxTitle.addWidget(self.btnMaximize)
-            self.hboxTitle.setAlignment(self.btnMaximize, Qt.AlignTop)
 
         self.btnClose = QToolButton(self.titleBar)
         self.btnClose.setObjectName('btnClose')
         self.btnClose.setSizePolicy(spButtons)
-        self.hboxTitle.addWidget(self.btnClose)
-        self.hboxTitle.setAlignment(self.btnClose, Qt.AlignTop)
 
         self.vboxFrame.addWidget(self.titleBar)
 
@@ -155,6 +146,47 @@ class ModernWindow(QWidget):
         self.vboxFrame.addWidget(self.windowContent)
 
         self.vboxWindow.addWidget(self.windowFrame)
+
+
+        # Add everything to hboxTitle
+        if osx_buttons:
+            self.hboxTitle.addItem(QSpacerItem(10, 10, QSizePolicy.Fixed, QSizePolicy.Minimum))
+            m = [16]*4
+            self.btnClose.setContentsMargins(*m)
+            self.btnMinimize.setContentsMargins(*m)
+
+            self.hboxTitle.addWidget(self.btnClose)
+            self.hboxTitle.addWidget(self.btnMinimize)
+            
+            if self.resizable:
+                self.btnRestore.setContentsMargins(*m)
+                self.btnMaximize.setContentsMargins(*m)
+
+                self.hboxTitle.addWidget(self.btnRestore)
+                self.hboxTitle.addWidget(self.btnMaximize)
+            self.hboxTitle.addWidget(self.lblTitle)
+            self.hboxTitle.addItem(QSpacerItem(40, 10, QSizePolicy.Expanding, QSizePolicy.Minimum))
+            if logo is not None:
+                self.hboxTitle.addWidget(self.logoLbl)
+
+        else:
+            if logo is not None:
+                self.hboxTitle.addWidget(self.logoLbl)
+            self.hboxTitle.addWidget(self.lblTitle)
+            self.hboxTitle.addItem(QSpacerItem(40, 10, QSizePolicy.Expanding, QSizePolicy.Minimum))
+            self.hboxTitle.addWidget(self.btnMinimize)
+            if self.resizable:
+                self.hboxTitle.addWidget(self.btnMaximize)
+                self.hboxTitle.addWidget(self.btnRestore)
+            self.hboxTitle.addWidget(self.btnClose)
+
+            self.hboxTitle.setAlignment(self.btnClose, Qt.AlignTop)
+            self.hboxTitle.setAlignment(self.btnMinimize, Qt.AlignTop)
+            if self.resizable:
+                self.hboxTitle.setAlignment(self.btnRestore, Qt.AlignTop)
+                self.hboxTitle.setAlignment(self.btnMaximize, Qt.AlignTop)
+
+
 
         # set window flags
         self.setWindowFlags(

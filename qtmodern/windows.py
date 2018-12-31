@@ -107,11 +107,11 @@ class ModernWindow(QWidget):
             pixmap = QtGui.QPixmap(logo)
             self.logoLbl.setScaledContents(True)
             self.logoLbl.setPixmap(pixmap)
-            self.logoLbl.setMaximumSize(QtCore.QSize(40, 40))
+            self.logoLbl.setMaximumSize(QtCore.QSize(30, 30))
             if osx_buttons:
-                self.logoLbl.setContentsMargins(0, 10, 10, 0)
+                self.logoLbl.setContentsMargins(0, 3, 3, 0)
             else:
-                self.logoLbl.setContentsMargins(10, 10, 0, 0)
+                self.logoLbl.setContentsMargins(3, 3, 0, 0)
 
         self.lblTitle = QLabel('Title')
         self.lblTitle.setObjectName('lblTitle')

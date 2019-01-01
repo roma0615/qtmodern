@@ -150,8 +150,8 @@ class ModernWindow(QWidget):
 
         # Add everything to hboxTitle
         if osx_buttons:
-            self.hboxTitle.addItem(QSpacerItem(10, 10, QSizePolicy.Fixed, QSizePolicy.Minimum))
-            m = [16]*4
+            self.hboxTitle.addItem(QSpacerItem(4, 10, QSizePolicy.Fixed, QSizePolicy.Minimum))
+            m = [10]*4
             self.btnClose.setContentsMargins(*m)
             self.btnMinimize.setContentsMargins(*m)
 

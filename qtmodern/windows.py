@@ -57,9 +57,12 @@ class ModernWindow(QWidget):
             parent (QWidget, optional): Parent widget.
     """
 
-    def __init__(self, w, parent=None, logo=None, resize=True, osx_buttons=False):
+    def __init__(self, w, parent=None, logo=None, resize=True):
         QWidget.__init__(self, parent)
         self.resizable = resize
+
+        import platform
+        osx_buttons = platform.system() == 'Darwin'
 
         self.setupUi(logo, osx_buttons)
         self.setupEvents(w)
